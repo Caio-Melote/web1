@@ -36,7 +36,7 @@ def adicionar_chave(chave: Chave):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("INSERT INTO chaves (id, nome, situacao, status) VALUES (%s, %s, %s, %s)", (chave.id, chave.nome, chave.situacao, chave.status))
+        cur.execute("INSERT INTO chaves (nome, situacao, status) VALUES (%s, %s, %s)", (chave.nome, chave.situacao, chave.status))
         conn.commit()
         cur.close()
         conn.close()
