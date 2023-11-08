@@ -16,7 +16,7 @@ def listar_chaves():
         # Criando um cursor
         cur = conn.cursor()
         # Executando a consulta SQL para obter todas as chaves
-        cur.execute("SELECT * FROM chaves")
+        cur.execute("SELECT * FROM chaves WHERE status != 'inativo'")
         # Obtendo todos os resultados da consulta
         chaves = cur.fetchall()
         # Fechando o cursor e a conexão com o banco de dados
@@ -56,5 +56,64 @@ def adicionar_chave(chave: Chave):
         cur.close()
         conn.close()
         return {"message": "Chave adicionada com sucesso!"}
+    except (Exception, psycopg2.Error) as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+# Definindo uma rota DELETE para "/chaves"
+@router.delete("/chaves/{id}")
+def deletar_chave(id: int):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # Verificando se a chave existe
+        cur.execute("SELECT * FROM chaves WHERE id = %s", (id,))
+        resultado = cur.fetchone()
+        if resultado is None:
+            return {"message": "Chave não encontrada!"}
+        # Executando a consulta SQL para alterar o status da chave para 'inativo'
+        cur.execute("UPDATE chaves SET status = 'inativo' WHERE id = %s", (id,))
+        # Confirmando a transação
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {"message": "Chave deletada com sucesso!"}
+    except (Exception, psycopg2.Error) as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+# Definindo uma rota PUT para "/chaves"
+@router.put("/chaves/{nome}")
+def alterar_chave(nome: str, chave: Chave):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # Verificando se a chave existe
+        cur.execute("SELECT * FROM chaves WHERE nome = %s", (nome,))
+        resultado = cur.fetchone()
+        if resultado is None:
+            return {"message": "Chave não encontrada!"}
+        # Executando a consulta SQL para alterar a chave pelo nome
+        cur.execute("UPDATE chaves SET nome = %s, situacao = %s, status = %s WHERE nome = %s", (chave.nome, chave.situacao, chave.status, nome))
+        # Confirmando a transação
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {"message": "Chave alterada com sucesso!"}
+    except (Exception, psycopg2.Error) as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+# Definindo uma rota GET que busca pelos nomes para "/chaves"
+@router.get("/chaves/{nome}")
+def buscar_chave(nome: str):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # Executando a consulta SQL para buscar a chave pelo nome
+        cur.execute("SELECT * FROM chaves WHERE nome = %s", (nome,))
+        resultado = cur.fetchone()
+        if resultado is None:
+            return {"message": "Chave não encontrada!"}
+        cur.close()
+        conn.close()
+        return {resultado}
     except (Exception, psycopg2.Error) as error:
         raise HTTPException(status_code=400, detail=str(error))
