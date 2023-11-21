@@ -114,6 +114,6 @@ def buscar_chave(nome: str):
             return {"message": "Chave não encontrada!"}
         cur.close()
         conn.close()
-        return {resultado}
+        return {"chave": resultado}
     except (Exception, psycopg2.Error) as error:
         raise HTTPException(status_code=400, detail=str(error))
