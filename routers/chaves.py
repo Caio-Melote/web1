@@ -60,18 +60,18 @@ def adicionar_chave(chave: Chave):
         raise HTTPException(status_code=400, detail=str(error))
 
 # Definindo uma rota DELETE para "/chaves"
-@router.delete("/chaves/{id}")
-def deletar_chave(id: int):
+@router.delete("/chaves/{nome}")
+def deletar_chave(nome: str):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         # Verificando se a chave existe
-        cur.execute("SELECT * FROM chaves WHERE id = %s", (id,))
+        cur.execute("SELECT * FROM chaves WHERE nome = %s", (nome,))
         resultado = cur.fetchone()
         if resultado is None:
             return {"message": "Chave não encontrada!"}
         # Executando a consulta SQL para alterar o status da chave para 'inativo'
-        cur.execute("UPDATE chaves SET status = 'inativo' WHERE id = %s", (id,))
+        cur.execute("UPDATE chaves SET status = 'inativo' WHERE nome = %s", (nome,))
         # Confirmando a transação
         conn.commit()
         cur.close()
